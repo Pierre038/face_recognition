@@ -32,12 +32,15 @@ def printRectangleArountTheFace(name,left,top,right,bottom,frame):
     cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
 def check_activity(persons,face_names):
+    global send_Person
     for person in persons:
         if person.num in face_names:
-            person.activate_person(datetime.datetime.now())
+            if person.activate_person(datetime.datetime.now(),send_Person):
+                send_Person = person.num
         else:
             if person.isActive:
-                person.inactive_person(datetime.datetime.now())
+                if person.inactive_person(datetime.datetime.now()):
+                    send_Person = 0
 
 ################################################################################################################################""
 #####################  FUNCTION-END
@@ -49,6 +52,7 @@ video_capture = cv2.VideoCapture(0 )
 
 known_Persons = []
 id_face = 0
+send_Person = 0
 
 
 # searching known people from image
@@ -128,7 +132,8 @@ while True:
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
                 name = known_Persons[best_match_index].num
-                known_Persons[best_match_index].activate_person(datetime.datetime.now())
+                if known_Persons[best_match_index].activate_person(datetime.datetime.now(),send_Person):
+                    send_Person = name
                 
             else:
                 id_face +=1
