@@ -3,7 +3,7 @@ from back_end_communication import *
 from services import *
 import datetime
 from param import *
-
+from utilServices import *
 
 #class Person
 #properties
@@ -29,27 +29,33 @@ from param import *
 class Person:
 
 
-    def __init__(self, Id, face_encoding, exists):
+    def __init__(self, Id, face_encoding, exists,sendPerson):
         self.num = Id
         self.face_encoding = face_encoding
         self.isActive = False
         self.exists = exists
         self.isSend = False
-        if (self.exists == False) :
-            self.save_Person()
         self.lastSeenTime = datetime.datetime(2000, 1, 1)
+        if (self.exists == False and sendPerson == 0) :
+            # creation et activation uniquement si aucune personne active en cours
+            self.save_Person()
+            post(Operation.new,self.num)
+            self.exists = True
 
     def save_Person(self):
         writeFace(self.num, self.face_encoding)
 
     def sendstate(self):
-        print('envoi de la personne: ', self.num)
-        post(self.num, self.isActive)
+        verbose('envoi de la personne: '+ self.num, 1)
+        if self.isActive :
+            post(Operation.known_active,self.num)
+        else:
+            post(Operation.known_inactive, self.num)
     
     def activate_person(self,time, sendPerson):
         self.lastSeenTime = time
         if (self.isActive == False) :
-            print("on active la personne", self.num)
+            verbose("on active la personne"+ self.num, 1)
             self.isActive = True
         if sendPerson == 0:
             self.isSend = True
@@ -59,9 +65,9 @@ class Person:
         else:
             return False
 
-    def inactive_person(self, time):
+    def deactivate_person(self, time):
         if(time - self.lastSeenTime) > Param.TIME_TO_INACTIVATE and self.isActive and self.isSend:
-            print("la personne est partie, on la desactive", self.num)
+            verbose("la personne est partie, on la desactive"+ self.num, 1)
             self.isActive = False
             self.sendstate()
             return True

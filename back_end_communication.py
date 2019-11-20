@@ -1,24 +1,36 @@
 import requests
+from utilServices import *
+from enum import Enum
+from param import *
+
+class Operation(Enum):
+    new = "NEW"
+    known_active = "KNOWN_ACTIVE"
+    known_inactive = "KNOWN_INACTIVE"
 
 #http post
-def post(faceName,isActive):
-    # defining the api-endpoint  
-    API_ENDPOINT = "http://ptsv2.com/t/ya1h9-1571410758/post"
-    
-    # your API key here 
-    API_KEY = "XXXXXXXXXXXXXXXXX"
-  
-    # your source code here 
-    source_code = "person num: " + faceName 
-    option = 'activate' if isActive else  'inactivate'
-    
-    # data to be sent to api 
-    data = {'api_dev_key':API_KEY, 
-            'api_option': option, 
-            'api_paste_code':source_code, 
-            'api_paste_format':'python'} 
-
-    # sending post request and saving response as response object 
-    r = requests.post(url = API_ENDPOINT, data = data) 
-
-#il faudrait poster une image pour etre sur de l utilisateur si nouveau si qui de plusieurs personnes en meme temps devant la camera
+def post(operation, faceName):
+    if operation.value == "NEW":
+            #envoi d'un visage inconnu jusqu'ici:
+            API_ENDPOINT = Param.URL + "users"
+            verbose(API_ENDPOINT,0)
+            # data to be sent to api 
+            payload = {'_id':faceName, 
+                    'firstName': 'unknown', 
+                    'lastName':'unknown', 
+                    'status':'unknown'
+                    } 
+            r = requests.post(url = API_ENDPOINT,data=payload)
+            verbose(r.text,5)
+    elif operation.value == "KNOWN_ACTIVE":
+            #envoi d'un visage connu
+            API_ENDPOINT = Param.URL + str(faceName)
+            verbose(API_ENDPOINT,0)
+            payload = {}
+            r = requests.post(url = API_ENDPOINT,data=payload)
+            verbose(r.text,5)
+    elif operation.value == "KNOWN_INACTIVE":
+        verbose("fonction inactive pour le moment",99)
+    else :
+            verbose("fonctionnalite inconnue lors de l appel post:" + str(operation.value), 99)
+   

@@ -8,5 +8,6 @@ class Param:
     FACE_PATH ='/home/pierre/Documents/project/facestock'
     #
     TIME_TO_INACTIVATE = datetime.datetime(2000,1,1,0,0,5,0) - datetime.datetime(2000,1,1,0,0,0,0)
-    #
-    ONLY_ONE_ACTIVE_PERSON = 1
+    #URL API
+    #URL = "http://ptsv2.com/t/ya1h9-1571410758/post"
+    URL ="http://192.168.43.115:3000/api/"
