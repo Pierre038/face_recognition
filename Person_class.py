@@ -27,35 +27,45 @@ from param import *
 #   savePerson (private)
 #       write a file id.face with face_encoding
 class Person:
-    def save_Person(self):
-        writeFace(self.num, self.face_encoding)
+
 
     def __init__(self, Id, face_encoding, exists):
         self.num = Id
         self.face_encoding = face_encoding
         self.isActive = False
         self.exists = exists
+        self.isSend = False
         if (self.exists == False) :
             self.save_Person()
         self.lastSeenTime = datetime.datetime(2000, 1, 1)
 
+    def save_Person(self):
+        writeFace(self.num, self.face_encoding)
+
     def sendstate(self):
+        print('envoi de la personne: ', self.num)
         post(self.num, self.isActive)
     
-    def activate_person(self,time):
+    def activate_person(self,time, sendPerson):
         self.lastSeenTime = time
         if (self.isActive == False) :
             print("on active la personne", self.num)
             self.isActive = True
+        if sendPerson == 0:
+            self.isSend = True
             self.sendstate()
-
- 
-
+        if self.isSend:
+            return True
+        else:
+            return False
 
     def inactive_person(self, time):
-        if(time - self.lastSeenTime) > Param.TIME_TO_INACTIVATE and self.isActive:
-            print("la personne est partie, on la desactive", self.num,time - self.lastSeenTime)
+        if(time - self.lastSeenTime) > Param.TIME_TO_INACTIVATE and self.isActive and self.isSend:
+            print("la personne est partie, on la desactive", self.num)
             self.isActive = False
             self.sendstate()
+            return True
+        else:
+            return False
 
      
