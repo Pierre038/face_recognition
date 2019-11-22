@@ -1,4 +1,4 @@
 def verbose(sayIt,level):
-    levelMin = 0
+    levelMin = 2
     if level >= levelMin:
         print(sayIt)

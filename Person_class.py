@@ -46,7 +46,7 @@ class Person:
         writeFace(self.num, self.face_encoding)
 
     def sendstate(self):
-        verbose('envoi de la personne: '+ self.num, 1)
+        verbose('envoi de la personne: '+ self.num, 3)
         if self.isActive :
             post(Operation.known_active,self.num)
         else:
@@ -55,7 +55,7 @@ class Person:
     def activate_person(self,time, sendPerson):
         self.lastSeenTime = time
         if (self.isActive == False) :
-            verbose("on active la personne"+ self.num, 1)
+            verbose("on active la personne"+ self.num, 3)
             self.isActive = True
         if sendPerson == 0:
             self.isSend = True
@@ -66,11 +66,13 @@ class Person:
             return False
 
     def deactivate_person(self, time):
-        if(time - self.lastSeenTime) > Param.TIME_TO_INACTIVATE and self.isActive and self.isSend:
-            verbose("la personne est partie, on la desactive"+ self.num, 1)
+        if(time - self.lastSeenTime) > Param.TIME_TO_INACTIVATE and self.isActive:
+            verbose("la personne est partie, on la desactive"+ self.num, 3)
             self.isActive = False
-            self.sendstate()
-            return True
+            if self.isSend:
+                self.sendstate()
+                return True
+            return False
         else:
             return False
 
