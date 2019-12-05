@@ -9,6 +9,7 @@ from back_end_gestion import *
 from param import *
 from Person_class import *
 import datetime
+from utilServices import *
 
 
 ################################################################################################################################""
@@ -39,7 +40,7 @@ def check_activity(persons,face_names):
                 send_Person = person.num
         else:
             if person.isActive:
-                if person.inactive_person(datetime.datetime.now()):
+                if person.deactivate_person(datetime.datetime.now()):
                     send_Person = 0
 
 ################################################################################################################################""
@@ -49,53 +50,38 @@ def check_activity(persons,face_names):
 
 # Get a reference to webcam #0 (the default one)
 video_capture = cv2.VideoCapture(0 )
+#video_capture = cv2.VideoCapture(1 )
+
+
 
 known_Persons = []
 id_face = 0
 send_Person = 0
 
 
-# searching known people from image
-# for element in os.listdir(Param.FACE_PATH):
-#     if element.endswith('.jpg'):
-#         print("'%s' est un fichier image" % element)
-#         image = face_recognition.load_image_file(element)
-#         small_image = cv2.resize(image, (0, 0), fx=0.25, fy=0.25)
-#         rgb_small_image = small_image[:, :, ::-1]
-#         face_location = face_recognition.face_locations(rgb_small_image)
-#         if len(face_location) >0 :
-#             face_encoding = face_recognition.face_encodings(rgb_small_image, face_location)[0]
-#             name= element.split('.')[0]
-#             known_face_encodings.append(face_encoding)
-            
-#             known_face_names.append(name)
-#             print( "l image a ete traitee")
-#             id = element.split('.')[0]
-#             if int(id) > id_face:
-#                 id_face=int(id)
-
 #searching known people from encoded face
 for element in os.listdir(Param.FACE_PATH):
-    print(element)
+    verbose(element,0)
     if element.endswith('.face'):
-        print("'%s' est un fichier visage encode" % element)
+        verbose("'%s' est un fichier visage encode" % element,0)
         face_encoding = readFace(Param.FACE_PATH + "/" + element)
         # known_face_encodings.append(face_encoding)
         id= element.split('.')[0]
         # known_face_names.append(id)
-        known_Persons.append(Person(id,face_encoding, True))
-        print( "le fichier a ete traite")
+        known_Persons.append(Person(id,face_encoding, True,send_Person))
+        verbose( "le fichier a ete traite",0)
         if int(id) > id_face:
             id_face=int(id)
 
 
 knownPersonNumber = len(known_Persons)
-print("nombre de personnes connues: " + str(knownPersonNumber))
+verbose("nombre de personnes connues: " + str(knownPersonNumber),3)
 
 
 # Initialize some variables
 face_locations = []
 face_encodings = []
+# array of persons presents in the frame:
 face_names = []
 process_this_frame = True
 
@@ -138,7 +124,7 @@ while True:
             else:
                 id_face +=1
                 name=str(id_face)
-                known_Persons.append(Person(name, face_encoding, False))
+                known_Persons.append(Person(name, face_encoding, False, send_Person))
                 
 
             face_names.append(name)
