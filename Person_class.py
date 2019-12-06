@@ -39,8 +39,10 @@ class Person:
         if (self.exists == False and sendPerson == 0) :
             # creation et activation uniquement si aucune personne active en cours
             self.save_Person()
+            verbose('creation de la personne: '+ self.num, 3)
             post(Operation.new,self.num)
             self.exists = True
+            self.isActive = True
 
     def save_Person(self):
         writeFace(self.num, self.face_encoding)

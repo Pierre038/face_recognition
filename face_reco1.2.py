@@ -125,6 +125,7 @@ while True:
                 id_face +=1
                 name=str(id_face)
                 known_Persons.append(Person(name, face_encoding, False, send_Person))
+                send_Person = name
                 
 
             face_names.append(name)
