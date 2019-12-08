@@ -29,21 +29,25 @@ from utilServices import *
 class Person:
 
 
-    def __init__(self, Id, face_encoding, exists,sendPerson):
+    def __init__(self, Id, faceEncoding, exists,sendPerson,image):
         self.num = Id
-        self.face_encoding = face_encoding
+        self.face_encoding = faceEncoding
         self.isActive = False
         self.exists = exists
         self.isSend = False
+        self.image = image
         self.lastSeenTime = datetime.datetime(2000, 1, 1)
         if (self.exists == False and sendPerson == 0) :
             # creation et activation uniquement si aucune personne active en cours
             self.save_Person()
-            post(Operation.new,self.num)
             self.exists = True
+            verbose('__init__ creation de la personne: '+ self.num, 3)
+            post(Operation.new,self.num)
+            self.isActive = True
 
     def save_Person(self):
         writeFace(self.num, self.face_encoding)
+        writePicture(self.num, self.image)
 
     def sendstate(self):
         verbose('envoi de la personne: '+ self.num, 3)
@@ -54,12 +58,20 @@ class Person:
     
     def activate_person(self,time, sendPerson):
         self.lastSeenTime = time
-        if (self.isActive == False) :
-            verbose("on active la personne"+ self.num, 3)
+        if not self.isActive  :
+            verbose("on active la personne (sans envoi)"+ self.num, 3)
             self.isActive = True
         if sendPerson == 0:
-            self.isSend = True
-            self.sendstate()
+            if self.exists:
+                self.isSend = True
+                self.sendstate()
+            else:
+                self.save_Person()
+                self.exists = True
+                verbose('activate creation de la personne: '+ self.num, 3)
+                post(Operation.new,self.num)
+                self.isActive = True
+                self.isSend = True
         if self.isSend:
             return True
         else:
@@ -67,7 +79,7 @@ class Person:
 
     def deactivate_person(self, time):
         if(time - self.lastSeenTime) > Param.TIME_TO_INACTIVATE and self.isActive:
-            verbose("la personne est partie, on la desactive"+ self.num, 3)
+            verbose("la personne est partie, on la desactive "+ self.num, 3)
             self.isActive = False
             if self.isSend:
                 self.sendstate()

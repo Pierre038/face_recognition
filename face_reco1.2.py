@@ -58,6 +58,8 @@ known_Persons = []
 id_face = 0
 send_Person = 0
 
+initTime = datetime.datetime.now()
+
 
 #searching known people from encoded face
 for element in os.listdir(Param.FACE_PATH):
@@ -65,10 +67,10 @@ for element in os.listdir(Param.FACE_PATH):
     if element.endswith('.face'):
         verbose("'%s' est un fichier visage encode" % element,0)
         face_encoding = readFace(Param.FACE_PATH + "/" + element)
-        # known_face_encodings.append(face_encoding)
         id= element.split('.')[0]
-        # known_face_names.append(id)
-        known_Persons.append(Person(id,face_encoding, True,send_Person))
+        #recherche fichier image
+        image = 'TODO'
+        known_Persons.append(Person(id,face_encoding, True,send_Person, image))
         verbose( "le fichier a ete traite",0)
         if int(id) > id_face:
             id_face=int(id)
@@ -90,7 +92,25 @@ process_this_frame = True
 #####################  END INIT
 ################################################################################################################################""
 
+# affichage pendant Xs sans reconnaissance
+
 while True:
+    # Grab a single frame of video
+    ret, frame = video_capture.read()
+    # Display the  image
+    cv2.imshow('Video', frame)
+    
+    if (datetime.datetime.now() - initTime ) > Param.TIME_TO_WAIT :
+        break
+    # Hit 'q' on the keyboard to quit!
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+    
+verbose('let s go!',3)
+
+
+while True:
+
     # Grab a single frame of video
     ret, frame = video_capture.read()
 
@@ -105,8 +125,8 @@ while True:
         # Find all the faces and face encodings in the current frame of video
         face_locations = face_recognition.face_locations(rgb_small_frame)
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-
         face_names = []
+        index = 0
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(map(lambda person: person.face_encoding, known_Persons), face_encoding)
@@ -117,17 +137,27 @@ while True:
             face_distances = face_recognition.face_distance(map(lambda person: person.face_encoding, known_Persons), face_encoding)
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
+                verbose('personne connue',0)
                 name = known_Persons[best_match_index].num
                 if known_Persons[best_match_index].activate_person(datetime.datetime.now(),send_Person):
                     send_Person = name
                 
             else:
+                verbose('personne inconnue',2)
                 id_face +=1
                 name=str(id_face)
-                known_Persons.append(Person(name, face_encoding, False, send_Person))
-                
+                faceLocation = face_locations[index]
+                (bottom,right,top,left) = faceLocation
+                top *= 4
+                bottom *= 4
+                right *= 4
+                left *= 4
+                image = frame[bottom:top,left:right]
+                known_Persons.append(Person(name, face_encoding, False, send_Person,image))
+                send_Person = name
 
             face_names.append(name)
+            index = index + 1
 
     process_this_frame = not process_this_frame
 
