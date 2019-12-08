@@ -1,4 +1,6 @@
 import pickle
+import cv2
+import os
 from param import *
 
 
@@ -13,3 +15,8 @@ def readFace(file_name):
     encoded_face = pickle.load(file)
     file.close()
     return encoded_face
+
+def writePicture(name, picture):
+    fileName = name+'.jpg'
+    os.chdir(Param.FACE_PATH)
+    cv2.imwrite(fileName,picture)

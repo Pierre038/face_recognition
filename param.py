@@ -8,6 +8,7 @@ class Param:
     FACE_PATH ='/home/pierre/Documents/project/facestock'
     #
     TIME_TO_INACTIVATE = datetime.datetime(2000,1,1,0,0,5,0) - datetime.datetime(2000,1,1,0,0,0,0)
+    TIME_TO_WAIT = datetime.datetime(2000,1,1,0,0,2,0) - datetime.datetime(2000,1,1,0,0,0,0)
     #URL API
     #
     #URL = "http://ptsv2.com/t/ya1h9-1571410758/post/"

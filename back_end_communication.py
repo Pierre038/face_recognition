@@ -13,7 +13,7 @@ def post(operation, faceName):
     if operation.value == "NEW":
         #envoi d'un visage inconnu jusqu'ici:
         API_ENDPOINT = Param.URL + "users"
-        verbose(API_ENDPOINT,0)
+        verbose(API_ENDPOINT,1)
         # data to be sent to api 
         payload = {'_id':faceName, 
                 'firstName': 'unknown', 
@@ -25,7 +25,7 @@ def post(operation, faceName):
     elif operation.value == "KNOWN_ACTIVE":
         #envoi d'un visage connu
         API_ENDPOINT = Param.URL + "users/" + str(faceName)
-        verbose(API_ENDPOINT,0)
+        verbose(API_ENDPOINT,1)
         payload = {}
         r = requests.post(url = API_ENDPOINT,data=payload)
         verbose(r.text,5)
