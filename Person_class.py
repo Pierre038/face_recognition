@@ -29,9 +29,9 @@ from utilServices import *
 class Person:
 
 
-    def __init__(self, Id, faceEncoding, exists,sendPerson,image):
+    def __init__(self, Id, faceEncoding, exists, sendPerson, image):
         self.num = Id
-        self.face_encoding = faceEncoding
+        self.faceEncoding = faceEncoding
         self.isActive = False
         self.exists = exists
         self.isSend = False
@@ -39,24 +39,24 @@ class Person:
         self.lastSeenTime = datetime.datetime(2000, 1, 1)
         if (self.exists == False and sendPerson == 0) :
             # creation et activation uniquement si aucune personne active en cours
-            self.save_Person()
+            self.savePerson()
             self.exists = True
             verbose('__init__ creation de la personne: '+ self.num, 3)
             post(Operation.new,self.num)
             self.isActive = True
 
-    def save_Person(self):
-        writeFace(self.num, self.face_encoding)
+    def savePerson(self):
+        writeFace(self.num, self.faceEncoding)
         writePicture(self.num, self.image)
 
     def sendstate(self):
         verbose('envoi de la personne: '+ self.num, 3)
         if self.isActive :
-            post(Operation.known_active,self.num)
+            post(Operation.knownActive,self.num)
         else:
-            post(Operation.known_inactive, self.num)
+            post(Operation.knownInactive, self.num)
     
-    def activate_person(self,time, sendPerson):
+    def activatePerson(self,time, sendPerson):
         self.lastSeenTime = time
         if not self.isActive  :
             verbose("on active la personne (sans envoi)"+ self.num, 3)
@@ -66,7 +66,7 @@ class Person:
                 self.isSend = True
                 self.sendstate()
             else:
-                self.save_Person()
+                self.savePerson()
                 self.exists = True
                 verbose('activate creation de la personne: '+ self.num, 3)
                 post(Operation.new,self.num)
@@ -77,7 +77,7 @@ class Person:
         else:
             return False
 
-    def deactivate_person(self, time):
+    def deactivatePerson(self, time):
         if(time - self.lastSeenTime) > Param.TIME_TO_INACTIVATE and self.isActive:
             verbose("la personne est partie, on la desactive "+ self.num, 3)
             self.isActive = False
