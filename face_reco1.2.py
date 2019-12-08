@@ -32,16 +32,16 @@ def printRectangleArountTheFace(name,left,top,right,bottom,frame):
     font = cv2.FONT_HERSHEY_DUPLEX
     cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
-def check_activity(persons,face_names):
-    global send_Person
+def checkActivity(persons,faceNames):
+    global sendPerson
     for person in persons:
-        if person.num in face_names:
-            if person.activate_person(datetime.datetime.now(),send_Person):
-                send_Person = person.num
+        if person.num in faceNames:
+            if person.activatePerson(datetime.datetime.now(),sendPerson):
+                sendPerson = person.num
         else:
             if person.isActive:
-                if person.deactivate_person(datetime.datetime.now()):
-                    send_Person = 0
+                if person.deactivatePerson(datetime.datetime.now()):
+                    sendPerson = 0
 
 ################################################################################################################################""
 #####################  FUNCTION-END
@@ -49,14 +49,14 @@ def check_activity(persons,face_names):
 
 
 # Get a reference to webcam #0 (the default one)
-video_capture = cv2.VideoCapture(0 )
+videoCapture = cv2.VideoCapture(0 )
 #video_capture = cv2.VideoCapture(1 )
 
 
 
-known_Persons = []
-id_face = 0
-send_Person = 0
+knownPersons = []
+idFace = 0
+sendPerson = 0
 
 initTime = datetime.datetime.now()
 
@@ -66,26 +66,26 @@ for element in os.listdir(Param.FACE_PATH):
     verbose(element,0)
     if element.endswith('.face'):
         verbose("'%s' est un fichier visage encode" % element,0)
-        face_encoding = readFace(Param.FACE_PATH + "/" + element)
+        faceEncoding = readFace(Param.FACE_PATH + "/" + element)
         id= element.split('.')[0]
         #recherche fichier image
         image = 'TODO'
-        known_Persons.append(Person(id,face_encoding, True,send_Person, image))
+        knownPersons.append(Person(id,faceEncoding, True,sendPerson, image))
         verbose( "le fichier a ete traite",0)
-        if int(id) > id_face:
-            id_face=int(id)
+        if int(id) > idFace:
+            idFace=int(id)
 
 
-knownPersonNumber = len(known_Persons)
+knownPersonNumber = len(knownPersons)
 verbose("nombre de personnes connues: " + str(knownPersonNumber),3)
 
 
 # Initialize some variables
-face_locations = []
-face_encodings = []
+faceLocations = []
+faceEncodings = []
 # array of persons presents in the frame:
-face_names = []
-process_this_frame = True
+faceNames = []
+processThisFrame = True
 
 
 ################################################################################################################################""
@@ -96,7 +96,7 @@ process_this_frame = True
 
 while True:
     # Grab a single frame of video
-    ret, frame = video_capture.read()
+    ret, frame = videoCapture.read()
     # Display the  image
     cv2.imshow('Video', frame)
     
@@ -112,60 +112,60 @@ verbose('let s go!',3)
 while True:
 
     # Grab a single frame of video
-    ret, frame = video_capture.read()
+    ret, frame = videoCapture.read()
 
     # Resize frame of video to 1/4 size for faster face recognition processing
-    small_frame = cv2.resize(frame, (0, 0), fx=Param.SCALE_DOWN, fy=Param.SCALE_DOWN)
+    smallFrame = cv2.resize(frame, (0, 0), fx=Param.SCALE_DOWN, fy=Param.SCALE_DOWN)
 
     # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-    rgb_small_frame = small_frame[:, :, ::-1]
+    rgbSmallFrame = smallFrame[:, :, ::-1]
 
     # Only process every other frame of video to save time
-    if process_this_frame:
+    if processThisFrame:
         # Find all the faces and face encodings in the current frame of video
-        face_locations = face_recognition.face_locations(rgb_small_frame)
-        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-        face_names = []
+        faceLocations = face_recognition.face_locations(rgbSmallFrame)
+        faceEncodings = face_recognition.face_encodings(rgbSmallFrame, faceLocations)
+        faceNames = []
         index = 0
-        for face_encoding in face_encodings:
+        for faceEncoding in faceEncodings:
             # See if the face is a match for the known face(s)
-            matches = face_recognition.compare_faces(map(lambda person: person.face_encoding, known_Persons), face_encoding)
+            matches = face_recognition.compare_faces(map(lambda person: person.faceEncoding, knownPersons), faceEncoding)
             name = "Unknown"
 
             # use the known face with the smallest distance to the new face
 
-            face_distances = face_recognition.face_distance(map(lambda person: person.face_encoding, known_Persons), face_encoding)
-            best_match_index = np.argmin(face_distances)
-            if matches[best_match_index]:
+            faceDistances = face_recognition.face_distance(map(lambda person: person.faceEncoding, knownPersons), faceEncoding)
+            bestMatchIndex = np.argmin(faceDistances)
+            if matches[bestMatchIndex]:
                 verbose('personne connue',0)
-                name = known_Persons[best_match_index].num
-                if known_Persons[best_match_index].activate_person(datetime.datetime.now(),send_Person):
-                    send_Person = name
+                name = knownPersons[bestMatchIndex].num
+                if knownPersons[bestMatchIndex].activatePerson(datetime.datetime.now(),sendPerson):
+                    sendPerson = name
                 
             else:
                 verbose('personne inconnue',2)
-                id_face +=1
-                name=str(id_face)
-                faceLocation = face_locations[index]
+                idFace +=1
+                name=str(idFace)
+                faceLocation = faceLocations[index]
                 (bottom,right,top,left) = faceLocation
                 top *= 4
                 bottom *= 4
                 right *= 4
                 left *= 4
                 image = frame[bottom:top,left:right]
-                known_Persons.append(Person(name, face_encoding, False, send_Person,image))
-                send_Person = name
+                knownPersons.append(Person(name, faceEncoding, False, sendPerson,image))
+                sendPerson = name
 
-            face_names.append(name)
+            faceNames.append(name)
             index = index + 1
 
-    process_this_frame = not process_this_frame
+    processThisFrame = not processThisFrame
 
     # check active and inactive faces
-    check_activity(known_Persons,face_names)
+    checkActivity(knownPersons,faceNames)
 
     # Display the results
-    for (top, right, bottom, left), name in zip(face_locations, face_names):
+    for (top, right, bottom, left), name in zip(faceLocations, faceNames):
         printRectangleArountTheFace(name,left, top, right, bottom, frame)
 
     # Display the resulting image
@@ -176,6 +176,6 @@ while True:
         break
 
 # Release handle to the webcam
-video_capture.release()
+videoCapture.release()
 cv2.destroyAllWindows()
 

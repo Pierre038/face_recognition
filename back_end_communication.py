@@ -5,8 +5,8 @@ from param import *
 
 class Operation(Enum):
     new = "NEW"
-    known_active = "KNOWN_ACTIVE"
-    known_inactive = "KNOWN_INACTIVE"
+    knownActive = "KNOWN_ACTIVE"
+    knownInactive = "KNOWN_INACTIVE"
 
 #http post
 def post(operation, faceName):
