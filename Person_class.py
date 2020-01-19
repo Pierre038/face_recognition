@@ -44,6 +44,7 @@ class Person:
             verbose('__init__ creation de la personne: '+ self.num, 3)
             post(Operation.new,self.num)
             self.isActive = True
+            self.isSend = True
 
     def savePerson(self):
         writeFace(self.num, self.faceEncoding)
